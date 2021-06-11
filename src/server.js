@@ -28,3 +28,5 @@ app.post("/participants", (req, res) => {
         res.sendStatus(200);
     }
 });
+
+app.listen(4000);
