@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-let participants = [];
+let users = [];
 let messages = [];
 
 app.post("/participants", (req, res) => {
@@ -16,7 +16,7 @@ app.post("/participants", (req, res) => {
     }
     else{
         user.lastStatus = Date.now();
-        participants.push(user);
+        users.push(user);
         const success = {
             from: user.name,
             to: 'Todos',
@@ -28,5 +28,26 @@ app.post("/participants", (req, res) => {
         res.sendStatus(200);
     }
 });
+
+app.get("/participants", (req, res) => {
+    res.send(users);
+});
+
+app.post("/messages", (req, res) => {
+    const incomingMessage = req.body;
+    const sender = req.headers;
+    console.log(incomingMessage);
+    if(incomingMessage.to.length === 0 || incomingMessage.text.length === 0 || (incomingMessage.type !== 'message' && incomingMessage.type !== 'private_message') || sender.user.length === 0){
+        res.sendStatus(400);
+    }
+    else{
+        incomingMessage.from = sender.user;
+        incomingMessage.time = dayjs(Date.now()).format('HH:mm:ss');
+        messages.push(incomingMessage);
+        console.log(incomingMessage);
+        res.sendStatus(200);
+    }
+});
+
 
 app.listen(4000);
