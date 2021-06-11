@@ -48,19 +48,11 @@ app.post("/messages", (req, res) => {
 });
 
 app.get("/messages", (req, res) => {
-    let limit = req.query.limit;
+    let limit = parseInt(req.query.limit);
     const user = req.headers;
     const thisUserMessages = messages.filter(each => (each.type === 'private_message' && (each.from === user.user || each.to === user.user) || each.type === 'message' || each.type === 'status'));
-    if(limit){
-        let limitedMessages = []
-        for( let i = 0; i< thisUserMessages.length; i++){
-            limitedMessages.push(thisUserMessages[i]);
-            if(limitedMessages.length === limit){
-                res.send(limitedMessages);
-                return;
-            }
-        }
-        res.send(limitedMessages);
+    if(limit && thisUserMessages.length >=50){
+        res.send(thisUserMessages.slice((thisUserMessages.length - limit), (thisUserMessages.length)));
     }
     else{
         res.send(thisUserMessages);
