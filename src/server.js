@@ -36,7 +36,6 @@ app.get("/participants", (req, res) => {
 app.post("/messages", (req, res) => {
     const incomingMessage = req.body;
     const sender = req.headers;
-    console.log(incomingMessage);
     if(incomingMessage.to.length === 0 || incomingMessage.text.length === 0 || (incomingMessage.type !== 'message' && incomingMessage.type !== 'private_message') || sender.user.length === 0){
         res.sendStatus(400);
     }
@@ -44,10 +43,28 @@ app.post("/messages", (req, res) => {
         incomingMessage.from = sender.user;
         incomingMessage.time = dayjs(Date.now()).format('HH:mm:ss');
         messages.push(incomingMessage);
-        console.log(incomingMessage);
         res.sendStatus(200);
     }
 });
 
+app.get("/messages", (req, res) => {
+    let limit = req.query.limit;
+    const user = req.headers;
+    const thisUserMessages = messages.filter(each => (each.type === 'private_message' && (each.from === user.user || each.to === user.user) || each.type === 'message' || each.type === 'status'));
+    if(limit){
+        let limitedMessages = []
+        for( let i = 0; i< thisUserMessages.length; i++){
+            limitedMessages.push(thisUserMessages[i]);
+            if(limitedMessages.length === limit){
+                res.send(limitedMessages);
+                return;
+            }
+        }
+        res.send(limitedMessages);
+    }
+    else{
+        res.send(thisUserMessages);
+    }        
+});
 
 app.listen(4000);
